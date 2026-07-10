@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Spanisch 🇦🇷 — Vokabeltrainer</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#1a1e27; --card2:#222834; --line:#2c3340;
+    --txt:#e8ecf3; --muted:#9aa4b5; --accent:#5b8cff; --accent2:#3a5bd0;
+    --again:#e0555a; --good:#4caf72; --gold:#ffb020;
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f2f4f8; --card:#ffffff; --card2:#f6f8fc; --line:#e2e6ee;
+      --txt:#1a1e27; --muted:#5b6473; --accent:#3a5bd0; }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; height:100%}
+  body{background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; flex-direction:column; min-height:100dvh}
+  header{display:flex; align-items:center; gap:10px; padding:12px 16px;
+    border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:10}
+  header h1{font-size:16px; margin:0; font-weight:700}
+  header h1 .sub{color:var(--muted); font-size:12px; font-weight:400}
+  .flame{margin-left:auto; font-size:13px; font-weight:800; color:var(--gold); white-space:nowrap}
+  nav{display:flex; gap:4px}
+  nav button{background:var(--card); color:var(--txt); border:1px solid var(--line);
+    border-radius:10px; padding:8px 11px; font-size:13px; cursor:pointer; font-weight:600}
+  nav button.active{background:var(--accent); border-color:var(--accent); color:#fff}
+  main{flex:1; width:100%; max-width:640px; margin:0 auto; padding:16px; display:flex; flex-direction:column}
+  .view{display:none; flex:1; flex-direction:column}
+  .view.active{display:flex}
+
+  /* Tagesziel */
+  .goal{margin-bottom:12px}
+  .goal .top{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; font-weight:600}
+  .bar{height:8px; background:var(--card2); border:1px solid var(--line); border-radius:20px; overflow:hidden}
+  .bar>i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--good)); width:0}
+
+  /* Mode-Umschalter */
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; width:100%; margin-bottom:12px}
+  .seg button{flex:1; background:var(--card); border:none; padding:9px 6px; color:var(--muted); font-weight:700; cursor:pointer; font-size:13px}
+  .seg button.on{background:var(--accent); color:#fff}
+
+  .stats{display:flex; gap:8px; margin-bottom:14px}
+  .stat{flex:1; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px; text-align:center}
+  .stat .n{font-size:20px; font-weight:800}
+  .stat .l{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px}
+  .stat.new .n{color:var(--accent)} .stat.learn .n{color:var(--gold)} .stat.due .n{color:var(--good)}
+
+  /* Karte */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:26px 18px; text-align:center; min-height:270px; position:relative}
+  .cat{position:absolute; top:12px; left:14px; font-size:11px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.6px; font-weight:700}
+  .timer{position:absolute; top:12px; right:14px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:700}
+  .prompt{font-size:clamp(24px,6.5vw,38px); font-weight:700; line-height:1.2}
+  .prompt .tr{font-size:clamp(15px,4vw,20px); color:var(--muted); font-style:italic; margin-top:6px; font-weight:400}
+  .answer{margin-top:8px; width:100%; display:none}
+  .answer.show{display:block; animation:fade .18s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)}to{opacity:1}}
+  .ru{font-size:clamp(28px,8vw,48px); font-weight:800; color:var(--accent)}
+  .ru.ok{color:var(--good)} .ru.bad{color:var(--again)}
+  .tr{font-size:clamp(15px,4vw,20px); color:var(--muted); margin-top:5px; font-style:italic}
+  .divider{height:1px; background:var(--line); width:60%; margin:16px auto 12px}
+  .speak{margin-top:10px; background:var(--card2); border:1px solid var(--line); color:var(--txt);
+    width:46px; height:46px; border-radius:50%; font-size:20px; cursor:pointer; line-height:1}
+  .speak:active{transform:scale(.94)}
+
+  /* Multiple Choice */
+  .choices{display:grid; gap:8px; width:100%}
+  .choice{background:var(--card2); border:1px solid var(--line); color:var(--txt);
+    border-radius:12px; padding:14px; font-size:18px; font-weight:700; cursor:pointer; text-align:center}
+  .choice small{display:block; font-weight:400; font-size:12px; color:var(--muted); font-style:italic; margin-top:2px}
+  .choice:active{transform:scale(.99)}
+  .choice.ok{background:rgba(76,175,114,.18); border-color:var(--good); color:var(--good)}
+  .choice.bad{background:rgba(224,85,90,.16); border-color:var(--again); color:var(--again)}
+  .choice kbd{color:var(--muted); font-size:11px; margin-right:6px}
+
+  /* Tippen */
+  .typewrap{width:100%}
+  .feedback{font-size:14px; font-weight:700; margin-top:10px; min-height:20px}
+  .feedback.ok{color:var(--good)} .feedback.bad{color:var(--again)}
+
+  .controls{margin-top:14px}
+  .reveal{width:100%; padding:20px; font-size:18px; font-weight:800; border:none; border-radius:14px; background:var(--accent); color:#fff; cursor:pointer}
+  .reveal small{opacity:.75}
+  .grades{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+  .grade{position:relative; border:none; border-radius:16px; padding:24px 8px 28px; min-height:84px; color:#fff; cursor:pointer; font-weight:800; font-size:18px}
+  .grade small{display:block; font-weight:500; font-size:11px; opacity:.9; margin-top:3px}
+  .grade kbd{position:absolute; bottom:5px; left:0; right:0; font-size:11px; opacity:.75; font-family:inherit}
+  .grade.again{background:var(--again)} .grade.good{background:var(--good)}
+  .grade:active{transform:scale(.97)}
+
+  .empty{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--muted); text-align:center; gap:12px}
+  .empty .big{font-size:48px}
+
+  /* Statistik-Seite */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .box{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px}
+  .box .n{font-size:24px; font-weight:800} .box .l{font-size:12px; color:var(--muted); margin-top:2px}
+  .box.wide{grid-column:1 / -1}
+
+  /* Listen/Formulare */
+  .toolbar{display:flex; gap:8px; margin-bottom:12px}
+  input,textarea,select{background:var(--card); color:var(--txt); border:1px solid var(--line);
+    border-radius:10px; padding:11px 12px; font-size:15px; font-family:inherit; width:100%}
+  textarea{min-height:120px; resize:vertical}
+  .btn{background:var(--accent); color:#fff; border:none; border-radius:10px; padding:11px 16px; font-weight:700; cursor:pointer; font-size:14px}
+  .btn.ghost{background:var(--card); color:var(--txt); border:1px solid var(--line)}
+  .btn.danger{background:var(--again)}
+  label.field{display:block; font-size:12px; color:var(--muted); margin:10px 0 4px; font-weight:600}
+  .wordlist{display:flex; flex-direction:column; gap:6px; overflow:auto}
+  .word{display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px}
+  .word .de{flex:1; font-weight:600}
+  .word .rw{color:var(--accent); font-weight:700}
+  .word .rw small{display:block; color:var(--muted); font-weight:400; font-style:italic}
+  .word .st{font-size:10px; color:var(--muted); padding:2px 6px; border:1px solid var(--line); border-radius:20px}
+  .word .del{background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:0 4px}
+  .hint{color:var(--muted); font-size:12px; line-height:1.5}
+  .switchrow{display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:8px}
+  .switchrow span{font-weight:600; font-size:14px}
+  .seg.small{width:auto; margin:0}
+  .seg.small button{padding:8px 12px}
+  footer{text-align:center; color:var(--muted); font-size:11px; padding:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Spanisch <span class="sub">Río de la Plata 🇦🇷</span></h1>
+  <div class="flame" id="flame">🔥 0</div>
+  <nav>
+    <button data-view="study" class="active">Lernen</button>
+    <button data-view="stats">📊</button>
+    <button data-view="list">Wörter</button>
+    <button data-view="add">＋</button>
+    <button data-view="settings">⚙</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ===================== LERNEN ===================== -->
+  <section class="view active" id="view-study">
+    <div class="goal">
+      <div class="top"><span>Tagesziel</span><span id="goal-txt">0 / 30</span></div>
+      <div class="bar"><i id="goal-bar"></i></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat new"><div class="n" id="s-new">0</div><div class="l">Neu</div></div>
+      <div class="stat learn"><div class="n" id="s-learn">0</div><div class="l">Lernen</div></div>
+      <div class="stat due"><div class="n" id="s-due">0</div><div class="l">Fällig</div></div>
+    </div>
+
+    <div id="card-area" style="flex:1; display:flex; flex-direction:column">
+      <div class="card" id="card">
+        <div class="cat" id="c-cat"></div>
+        <div class="timer" id="c-timer">0:00</div>
+        <div class="prompt" id="c-prompt">—</div>
+
+        <!-- Karteikarte: Antwort -->
+        <div class="answer" id="c-answer">
+          <div class="divider"></div>
+          <div class="ru" id="c-ru"></div>
+          <div class="tr" id="c-tr"></div>
+          <button class="speak" id="btn-speak" title="Vorlesen">🔊</button>
+        </div>
+
+        <!-- Auswahl: Optionen -->
+        <div class="choices" id="c-choices" style="display:none; margin-top:18px"></div>
+
+        <!-- Tippen -->
+        <div class="typewrap" id="c-type" style="display:none; margin-top:18px">
+          <input id="type-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Antwort eingeben…">
+          <div class="feedback" id="type-fb"></div>
+        </div>
+      </div>
+
+      <div class="controls" id="controls">
+        <!-- Karteikarte -->
+        <button class="reveal" id="btn-reveal">Aufdecken <small>(↓ Pfeil nach unten)</small></button>
+        <div class="grades" id="grades" style="display:none">
+          <button class="grade again" data-g="again">✗ Wusste ich nicht<small id="iv-again"></small><kbd>← links</kbd></button>
+          <button class="grade good" data-g="good">✓ Wusste ich<small id="iv-good"></small><kbd>rechts →</kbd></button>
+        </div>
+        <!-- Auswahl / Tippen: Weiter -->
+        <button class="reveal" id="btn-next" style="display:none">Weiter <small>(Enter / →)</small></button>
+        <button class="reveal" id="btn-check" style="display:none">Prüfen <small>(Enter)</small></button>
+      </div>
+    </div>
+
+    <div class="empty" id="done" style="display:none">
+      <div class="big">✓</div>
+      <div><b>Tagesaufgabe geschafft!</b></div>
+      <div class="hint" id="done-hint"></div>
+      <button class="btn ghost" id="btn-extra">Trotzdem weiter üben</button>
+    </div>
+  </section>
+
+  <!-- ===================== STATISTIK ===================== -->
+  <section class="view" id="view-stats">
+    <div class="grid2" id="stats-grid"></div>
+    <div style="height:14px"></div>
+    <button class="btn ghost" id="btn-reset-stats">Statistik zurücksetzen</button>
+  </section>
+
+  <!-- ===================== WÖRTER ===================== -->
+  <section class="view" id="view-list">
+    <div class="toolbar">
+      <input id="search" placeholder="Suchen…">
+      <select id="filter-cat" style="max-width:160px"></select>
+    </div>
+    <div class="hint" id="list-count" style="margin-bottom:8px"></div>
+    <div class="wordlist" id="wordlist"></div>
+  </section>
+
+  <!-- ===================== HINZUFÜGEN ===================== -->
+  <section class="view" id="view-add">
+    <h3 style="margin:4px 0 2px">Eigenes Wort hinzufügen</h3>
+    <label class="field">Deutsch</label><input id="add-de" placeholder="z. B. Zug">
+    <label class="field">Spanisch</label><input id="add-ru" placeholder="поезд">
+    <label class="field">Lautschrift (optional)</label><input id="add-tr" placeholder="póisd">
+    <label class="field">Kategorie (optional)</label><input id="add-cat" placeholder="Reisen">
+    <div style="height:10px"></div><button class="btn" id="btn-add">Hinzufügen</button>
+    <div class="divider" style="width:100%; margin:22px 0 14px"></div>
+    <h3 style="margin:0 0 2px">Liste importieren</h3>
+    <p class="hint">Ein Wort pro Zeile: <b>deutsch ; spanisch ; notiz ; kategorie</b> (Lautschrift &amp; Kategorie optional). Trennzeichen <b>;</b> oder Tab.</p>
+    <textarea id="import-box" placeholder="Zug ; поезд ; póisd ; Reisen&#10;Ticket ; билет ; bilét ; Reisen"></textarea>
+    <div style="height:8px"></div><button class="btn" id="btn-import">Importieren</button>
+    <div class="hint" id="import-msg" style="margin-top:8px"></div>
+  </section>
+
+  <!-- ===================== EINSTELLUNGEN ===================== -->
+  <section class="view" id="view-settings">
+    <div class="switchrow"><span>Lernrichtung</span>
+      <div class="seg small" id="seg-dir"><button data-dir="de2ru" class="on">DE → ES</button><button data-dir="ru2de">ES → DE</button></div></div>
+    <div class="switchrow"><span>Lautschrift zeigen</span>
+      <div class="seg small" id="seg-tr"><button data-tr="1" class="on">An</button><button data-tr="0">Aus</button></div></div>
+    <div class="switchrow"><span>Wörter vorlesen 🔊</span>
+      <div class="seg small" id="seg-speak"><button data-speak="1" class="on">An</button><button data-speak="0">Aus</button></div></div>
+    <div class="switchrow"><span id="voice-status" style="font-weight:400; font-size:13px">Stimme: wird geprüft…</span>
+      <button class="btn ghost" id="btn-testvoice" style="padding:8px 12px; white-space:nowrap">🔊 Testen</button></div>
+    <div class="switchrow"><span>Wörter gleichzeitig im Pool</span>
+      <div class="seg small" id="seg-new"><button data-new="10">10</button><button data-new="20" class="on">20</button><button data-new="40">40</button><button data-new="9999">Alle</button></div></div>
+    <div class="switchrow"><span>Tagesziel (Karten)</span>
+      <div class="seg small" id="seg-goal"><button data-goal="20">20</button><button data-goal="30" class="on">30</button><button data-goal="50">50</button><button data-goal="100">100</button></div></div>
+    <div class="hint" style="margin:14px 0">Lernstand &amp; Statistik werden lokal in diesem Browser gespeichert (nur auf diesem Gerät). Wiederhol-Methode: <b>Langzeitgedächtnis</b> — 1 → 2 → 4 → 8 → 16 Tage.</div>
+    <div class="switchrow" style="flex-direction:column; align-items:stretch; gap:8px">
+      <span id="sync-dot">☁️ Geräte-Sync (Firebase)</span>
+      <input id="sync-url" placeholder="Firebase-Datenbank-URL (https://...firebasedatabase.app)">
+      <input id="sync-code" placeholder="Persönlicher Sync-Code (z. B. darius-russ-2026)">
+      <button class="btn" id="btn-sync-connect">Verbinden &amp; synchronisieren</button>
+      <div class="hint" id="sync-status">Nicht verbunden</div>
+    </div>
+    <button class="btn ghost" id="btn-export">Lernstand als Datei sichern</button>
+    <div style="height:8px"></div>
+    <button class="btn danger" id="btn-reset">Lernstand zurücksetzen</button>
+  </section>
+</main>
+
+<footer>Spanisch (Argentinien) · offline · Langzeitgedächtnis</footer>
+
+<script>
+/* ============================ WORTLISTE (Kern-Wortschatz) ============================ */
+const SEED = [
+ ["ja","sí","","Basis"],
+ ["nein","no","","Basis"],
+ ["ich","yo","","Pronomen"],
+ ["du","vos","voseo (statt tú)","Pronomen"],
+ ["sein","ser","","Verben"],
+ ["nicht","no","","Basis"],
+ ["und","y","","Konjunktion"],
+ ["das ist / dies","esto","","Pronomen"],
+ ["danke","gracias","","Höflichkeit"],
+ ["bitte","por favor","","Höflichkeit"],
+ ["was","qué","","Frage"],
+ ["wer","quién","","Frage"],
+ ["wo","dónde","","Frage"],
+ ["wie","cómo","","Frage"],
+ ["gut (Adv)","bien","","Adverb"],
+ ["schlecht (Adv)","mal","","Adverb"],
+ ["sehr","muy","","Adverb"],
+ ["hier","acá","argent. (statt aquí)","Adverb"],
+ ["Haus","casa","","Nomen"],
+ ["Wasser","agua","","Nomen"],
+ ["er","él","","Pronomen"],
+ ["sie (Einz.)","ella","","Pronomen"],
+ ["wir","nosotros","","Pronomen"],
+ ["ihr / Sie","ustedes","kein vosotros","Pronomen"],
+ ["sie (Mehrz.)","ellos","","Pronomen"],
+ ["mein","mi","","Pronomen"],
+ ["dein","tu","","Pronomen"],
+ ["dort","allá","","Adverb"],
+ ["jetzt","ahora","","Zeit"],
+ ["heute","hoy","","Zeit"],
+ ["Mann","hombre","","Nomen"],
+ ["Frau","mujer","","Nomen"],
+ ["Kind","niño","auch: chico","Nomen"],
+ ["Mensch","persona","","Nomen"],
+ ["groß","grande","","Adjektiv"],
+ ["klein","pequeño","auch: chico","Adjektiv"],
+ ["auch","también","","Adverb"],
+ ["aber","pero","","Konjunktion"],
+ ["oder","o","","Konjunktion"],
+ ["wie viel","cuánto","","Frage"],
+ ["machen","hacer","","Verben"],
+ ["wollen","querer","vos querés","Verben"],
+ ["können","poder","vos podés","Verben"],
+ ["müssen / nötig","tener que","","Verben"],
+ ["gehen","ir","","Verben"],
+ ["kommen","venir","","Verben"],
+ ["sagen","decir","","Verben"],
+ ["sprechen","hablar","","Verben"],
+ ["wissen","saber","","Verben"],
+ ["sehen","ver","","Verben"],
+ ["geben","dar","","Verben"],
+ ["nehmen","tomar","","Verben"],
+ ["essen","comer","","Verben"],
+ ["trinken","beber","auch: tomar","Verben"],
+ ["neu","nuevo","","Adjektiv"],
+ ["alt","viejo","","Adjektiv"],
+ ["in","en","","Präposition"],
+ ["auf","sobre","","Präposition"],
+ ["mit","con","","Präposition"],
+ ["für","para","","Präposition"],
+ ["wann","cuándo","","Frage"],
+ ["warum","por qué","","Frage"],
+ ["wohin","adónde","","Frage"],
+ ["woher","de dónde","","Frage"],
+ ["welcher","cuál","","Frage"],
+ ["von","de","","Präposition"],
+ ["zu (nach)","a","","Präposition"],
+ ["ohne","sin","","Präposition"],
+ ["bei (jdm)","en lo de","argent., z. B. en lo de Juan","Präposition"],
+ ["nach (zeitl.)","después","","Präposition"],
+ ["vor (zeitl.)","antes","","Präposition"],
+ ["Tag","día","","Zeit"],
+ ["Jahr","año","","Zeit"],
+ ["Zeit","tiempo","","Zeit"],
+ ["Stunde","hora","","Zeit"],
+ ["morgen","mañana","","Zeit"],
+ ["gestern","ayer","","Zeit"],
+ ["immer","siempre","","Adverb"],
+ ["nie","nunca","","Adverb"],
+ ["oft","seguido","argent.; auch: a menudo","Adverb"],
+ ["eins","uno","","Zahl"],
+ ["zwei","dos","","Zahl"],
+ ["drei","tres","","Zahl"],
+ ["vier","cuatro","","Zahl"],
+ ["fünf","cinco","","Zahl"],
+ ["sechs","seis","","Zahl"],
+ ["sieben","siete","","Zahl"],
+ ["acht","ocho","","Zahl"],
+ ["neun","nueve","","Zahl"],
+ ["zehn","diez","","Zahl"],
+ ["viel","mucho","","Adverb"],
+ ["wenig","poco","","Adverb"],
+ ["mehr","más","","Adverb"],
+ ["weniger","menos","","Adverb"],
+ ["alle / alles","todo","","Pronomen"],
+ ["nichts","nada","","Pronomen"],
+ ["etwas","algo","","Pronomen"],
+ ["so","así","","Adverb"],
+ ["nur","solo","","Adverb"],
+ ["noch","todavía","","Adverb"],
+ ["Hallo","hola","","Höflichkeit"],
+ ["Guten Tag","buenos días","","Höflichkeit"],
+ ["Tschüss","chau","argent.","Höflichkeit"],
+ ["Auf Wiedersehen","hasta luego","","Höflichkeit"],
+ ["Entschuldigung","perdón","auch: disculpá","Höflichkeit"],
+ ["Wie geht's?","¿cómo andás?","voseo, argent.","Höflichkeit"],
+ ["Freund","amigo","","Nomen"],
+ ["Familie","familia","","Nomen"],
+ ["Mama","mamá","","Nomen"],
+ ["Papa","papá","","Nomen"],
+ ["Name","nombre","","Nomen"],
+ ["Stadt","ciudad","","Nomen"],
+ ["Land","país","","Nomen"],
+ ["Straße","calle","","Nomen"],
+ ["Auto","auto","statt coche","Nomen"],
+ ["Geld","plata","ugs.; formal: dinero","Nomen"],
+ ["Arbeit","trabajo","ugs.: laburo","Nomen"],
+ ["arbeiten","trabajar","","Verben"],
+ ["wohnen / leben","vivir","","Verben"],
+ ["lieben","amar","auch: querer","Verben"],
+ ["finden","encontrar","","Verben"],
+ ["suchen","buscar","","Verben"],
+ ["denken","pensar","","Verben"],
+ ["glauben","creer","","Verben"],
+ ["verstehen","entender","","Verben"],
+ ["helfen","ayudar","","Verben"],
+ ["fragen","preguntar","","Verben"],
+ ["antworten","contestar","","Verben"],
+ ["warten","esperar","","Verben"],
+ ["lesen","leer","","Verben"],
+ ["schreiben","escribir","","Verben"],
+ ["kaufen","comprar","","Verben"],
+ ["bezahlen","pagar","","Verben"],
+ ["gut (Adj)","bueno","","Adjektiv"],
+ ["schlecht (Adj)","malo","","Adjektiv"],
+ ["schön","lindo","typisch argent.","Adjektiv"],
+ ["wichtig","importante","","Adjektiv"],
+ ["richtig","correcto","","Adjektiv"],
+ ["einfach","fácil","","Adjektiv"],
+ ["schwierig","difícil","","Adjektiv"],
+ ["Nacht","noche","","Zeit"],
+ ["Morgen (früh)","la mañana","","Zeit"],
+ ["Abend","tarde","","Zeit"],
+ ["Woche","semana","","Zeit"],
+ ["Monat","mes","","Zeit"],
+ ["warm","caliente","","Adjektiv"],
+ ["kalt","frío","","Adjektiv"],
+ ["schnell","rápido","","Adjektiv"],
+ ["langsam","lento","","Adjektiv"],
+ ["teuer","caro","","Adjektiv"],
+ ["billig","barato","","Adjektiv"],
+ ["links","izquierda","","Adverb"],
+ ["rechts","derecha","","Adverb"],
+ ["geradeaus","todo derecho","argent.","Adverb"],
+ ["oben","arriba","","Adverb"],
+ ["unten","abajo","","Adverb"],
+ ["zusammen","juntos","","Adverb"],
+ ["wieder","de nuevo","auch: otra vez","Adverb"],
+ ["werden","volverse","","Verben"],
+ ["bleiben","quedarse","","Verben"],
+ ["bringen","traer","","Verben"],
+ ["zeigen","mostrar","","Verben"],
+ ["spielen","jugar","","Verben"],
+ ["lernen","aprender","","Verben"],
+ ["vergessen","olvidar","","Verben"],
+ ["sich erinnern","acordarse","","Verben"],
+ ["hören","escuchar","","Verben"],
+ ["fühlen","sentir","","Verben"],
+ ["weil","porque","","Konjunktion"],
+ ["wenn / falls","si","","Konjunktion"],
+ ["dass","que","","Konjunktion"],
+ ["dann","entonces","","Adverb"],
+ ["deshalb","por eso","","Adverb"],
+ ["vielleicht","quizás","auch: tal vez","Adverb"],
+ ["wirklich","de verdad","","Adverb"],
+ ["genug","suficiente","auch: bastante","Adverb"],
+ ["fast","casi","","Adverb"],
+ ["bald","pronto","","Adverb"],
+ ["Geschäft / Laden","negocio","","Orte"],
+ ["Markt","mercado","","Orte"],
+ ["Restaurant","restaurante","","Orte"],
+ ["Hotel","hotel","","Orte"],
+ ["Bahnhof","estación","","Orte"],
+ ["Flughafen","aeropuerto","","Orte"],
+ ["Toilette","baño","","Orte"],
+ ["Krankenhaus","hospital","","Orte"],
+ ["Apotheke","farmacia","","Orte"],
+ ["Bank","banco","","Orte"],
+ ["Zimmer","pieza","argent.; auch: habitación","Nomen"],
+ ["Tür","puerta","","Nomen"],
+ ["Fenster","ventana","","Nomen"],
+ ["Tisch","mesa","","Nomen"],
+ ["Stuhl","silla","","Nomen"],
+ ["Bett","cama","","Nomen"],
+ ["Buch","libro","","Nomen"],
+ ["Handy","celular","statt móvil","Nomen"],
+ ["Computer","computadora","","Nomen"],
+ ["Musik","música","","Nomen"],
+ ["Kaffee","café","","Essen"],
+ ["Tee","té","","Essen"],
+ ["Milch","leche","","Essen"],
+ ["Bier","cerveza","ugs.: birra","Essen"],
+ ["Wein","vino","","Essen"],
+ ["Fleisch","carne","","Essen"],
+ ["Fisch","pescado","","Essen"],
+ ["Gemüse","verdura","","Essen"],
+ ["Obst","fruta","","Essen"],
+ ["Apfel","manzana","","Essen"],
+ ["Ei","huevo","","Essen"],
+ ["Käse","queso","","Essen"],
+ ["Salz","sal","","Essen"],
+ ["Zucker","azúcar","","Essen"],
+ ["Suppe","sopa","","Essen"],
+ ["Brot","pan","","Essen"],
+ ["Frühstück","desayuno","","Essen"],
+ ["Mittagessen","almuerzo","","Essen"],
+ ["Abendessen","cena","","Essen"],
+ ["lecker","rico","riquísimo!","Essen"],
+ ["Körper","cuerpo","","Körper"],
+ ["Kopf","cabeza","","Körper"],
+ ["Hand","mano","","Körper"],
+ ["Arm","brazo","","Körper"],
+ ["Bein","pierna","","Körper"],
+ ["Auge","ojo","","Körper"],
+ ["Ohr","oreja","","Körper"],
+ ["Mund","boca","","Körper"],
+ ["Nase","nariz","","Körper"],
+ ["Herz","corazón","","Körper"],
+ ["Arzt","médico","auch: doctor","Körper"],
+ ["krank","enfermo","","Körper"],
+ ["gesund","sano","","Körper"],
+ ["Schmerz","dolor","","Körper"],
+ ["schlafen","dormir","","Verben"],
+ ["aufstehen","levantarse","","Verben"],
+ ["rot","rojo","","Farben"],
+ ["blau","azul","","Farben"],
+ ["grün","verde","","Farben"],
+ ["gelb","amarillo","","Farben"],
+ ["schwarz","negro","","Farben"],
+ ["weiß","blanco","","Farben"],
+ ["elf","once","","Zahl"],
+ ["zwölf","doce","","Zahl"],
+ ["zwanzig","veinte","","Zahl"],
+ ["dreißig","treinta","","Zahl"],
+ ["fünfzig","cincuenta","","Zahl"],
+ ["hundert","cien","","Zahl"],
+ ["tausend","mil","","Zahl"],
+ ["Montag","lunes","","Zeit"],
+ ["Samstag","sábado","","Zeit"],
+ ["Sonntag","domingo","","Zeit"]
+];
+
+/* ============================ Speicher ============================ */
+const DB_KEY="svt_cards_v1", SRS_KEY="svt_srs_v1", CFG_KEY="svt_cfg_v1", STAT_KEY="svt_stats_v1";
+const DAY=86400000;
+const loadJSON=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
+const saveJSON=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const keyOf=w=>w[0]+"|"+w[1];
+
+let cfg=Object.assign({dir:"de2ru",showTr:true,speak:true,newPerDay:20,poolSize:20,dailyGoal:30,mode:"karteikarte"},loadJSON(CFG_KEY,{}));
+cfg.mode="karteikarte"; // nur Karteikarten
+if(!cfg.poolSize) cfg.poolSize=cfg.newPerDay||20;
+let extra=loadJSON(DB_KEY,[]);
+let cards=SEED.concat(extra).map(w=>({de:w[0],ru:w[1],tr:w[2]||"",cat:w[3]||"Allgemein",key:keyOf(w)}));
+let srs=loadJSON(SRS_KEY,{});
+const SEED_VERSION="2026-07-10-es-ar"; if(localStorage.getItem("svt_seedver")!==SEED_VERSION){ srs={}; try{localStorage.removeItem(SRS_KEY);}catch(e){} localStorage.setItem("svt_seedver",SEED_VERSION); }
+let stats=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,days:{}},loadJSON(STAT_KEY,{}));
+
+function srsOf(k){ if(!srs[k]) srs[k]={reps:0,interval:0,due:0,phase:"new",step:0,lapses:0}; return srs[k]; }
+const saveSrs=()=>{ saveJSON(SRS_KEY,srs); scheduleSync(); };
+const saveCfg=()=>saveJSON(CFG_KEY,cfg);
+const saveStats=()=>{ saveJSON(STAT_KEY,stats); scheduleSync(); };
+
+/* ============================ Wiederhol-Logik (Langzeitgedächtnis) ============================ */
+const LEARN_STEPS=2, START_IV=1;
+function fmtIv(days){ if(days<1)return "bald"; if(days<30)return Math.round(days)+" Tag"+(Math.round(days)===1?"":"e"); if(days<365)return Math.round(days/30)+" Mon."; return (days/365).toFixed(1)+" J."; }
+function preview(s){
+  if(s.phase==="review") return {again:"gleich wieder", good:fmtIv(Math.max(START_IV,s.interval*2))};
+  return {again:"gleich wieder", good:(s.step+1>=LEARN_STEPS?fmtIv(START_IV):"noch üben")};
+}
+// Rückgabe: true = Wort geht ins Langzeit (verlässt Session), false = bleibt zum Drillen
+function grade(card,g){
+  const s=srsOf(card.key), now=Date.now();
+  if(g==="again"){ if(s.phase==="review")s.lapses++; s.phase=(s.phase==="new")?"new":"relearn"; s.step=0; s.interval=0; saveSrs(); return false; }
+  if(s.phase==="review"){ s.interval=Math.max(START_IV,s.interval*2); s.reps++; s.due=now+s.interval*DAY; saveSrs(); return true; }
+  s.step++;
+  if(s.step>=LEARN_STEPS){ s.phase="review"; s.reps=1; s.step=0; s.interval=START_IV; s.due=now+s.interval*DAY; saveSrs(); return true; }
+  saveSrs(); return false;
+}
+
+/* ============================ Kluge Lern-Reihenfolge ============================
+   Steuert, in welcher Reihenfolge der Pool NEUE Wörter freischaltet.
+   Durchmischt: pro Stufe Pronomen + Verben + Substantive + Adjektive + Bindewörter,
+   damit man von Anfang an Sätze bauen kann. Häufigkeit/Nützlichkeit zuerst.
+   Was hier nicht steht, kommt danach in Listen-Reihenfolge (Themen: Körper, Reisen …). */
+const ORDER=[];
+const ORD=(()=>{ const m={}; ORDER.forEach((d,i)=>m[d]=i); return m; })();
+const ordIdx=c=>ORD[c.de]!==undefined?ORD[c.de]:1e9;
+
+/* ============================ Session ============================ */
+let queue=[], current=null, extraMode=false;
+function counts(){ const now=Date.now(); let n=0,l=0,d=0;
+  for(const c of cards){ const s=srs[c.key];
+    if(!s||!s.started)n++; else if(s.phase==="review"){ if(s.due<=now)d++; } else l++; }
+  return {n,l,d}; } // n = noch gesperrt, l = im Pool (in Arbeit), d = fällige Wiederholung
+function buildSession(){
+  const now=Date.now(), due=[],prog=[],locked=[];
+  for(const c of cards){ const s=srs[c.key];
+    if(!s||!s.started) locked.push(c);            // noch nicht freigeschaltet
+    else if(s.phase==="review"){ if(s.due<=now)due.push(c); }  // Langzeit, gerade fällig
+    else prog.push(c); }                          // im Pool, wird gedrillt bis gewusst
+  locked.sort((a,b)=>ordIdx(a)-ordIdx(b));        // kluge Lern-Reihenfolge zuerst
+  // Pool auffüllen: nur so viele neue freischalten, dass der Pool voll ist
+  const room=extraMode?locked.length:Math.max(0,cfg.poolSize-prog.length);
+  queue=prog.concat(due).concat(locked.slice(0,room));
+  for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [queue[i],queue[j]]=[queue[j],queue[i]]; }
+}
+// Laufend neue Woerter nachschieben: sobald eins ins Langzeit wandert, rueckt sofort ein neues nach,
+// damit der Pool immer ~poolSize aktive Woerter hat (kein Kreisen der letzten paar am Ende).
+function introduceIfNeeded(){
+  let active=0;
+  for(const c of cards){ const s=srs[c.key]; if(s&&s.started&&s.phase!=="review") active++; }
+  let need=cfg.poolSize-active;
+  if(need<=0) return;
+  for(const c of cards){
+    if(need<=0) break;
+    const s=srs[c.key];
+    if(!s||!s.started){ srsOf(c.key).started=true;
+      const pos=queue.length?(1+Math.floor(Math.random()*queue.length)):0;
+      queue.splice(pos,0,c); need--; }
+  }
+  saveSrs();
+}
+// Karte zurück in die Runde stecken. soon=true (falsch beantwortet) -> eher nach vorne,
+// aber immer mit vollem Bereich bis ans Ende, damit keine Karten "einfrieren".
+function reinsert(card,soon){
+  const len=queue.length;
+  if(len<=2){ queue.push(card); return; }
+  let r=Math.random(); if(soon) r=r*r;           // falsch: nach vorne ziehen (aber Rest bleibt möglich)
+  const pos=2+Math.floor(r*(len-1));             // Position in [2 .. len]
+  queue.splice(Math.min(len,pos),0,card);
+}
+
+/* ============================ Statistik ============================ */
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function yesterdayStr(){ const d=new Date(Date.now()-DAY); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dayRec(d){ if(!stats.days[d]) stats.days[d]={answered:0,correct:0,newLearned:0,seconds:0}; return stats.days[d]; }
+function record(correct,elapsed,becameNew){
+  const d=todayStr();
+  if(stats.lastActiveDay!==d){ stats.streak=(stats.lastActiveDay===yesterdayStr())?stats.streak+1:1; stats.lastActiveDay=d; }
+  const r=dayRec(d);
+  r.answered++; stats.totalAnswered++;
+  r.seconds+=elapsed; stats.totalSeconds+=elapsed;
+  if(correct)r.correct++;
+  if(becameNew){ r.newLearned++; stats.newLearnedTotal++; }
+  saveStats();
+}
+
+/* ============================ Sprachausgabe ============================ */
+let ruVoice=null;
+function pickVoice(){ if(!('speechSynthesis'in window))return; const vs=speechSynthesis.getVoices(); ruVoice=vs.find(v=>/es[-_]?AR/i.test(v.lang))||vs.find(v=>/^es/i.test(v.lang))||null; }
+if('speechSynthesis'in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function speak(t){ if(!('speechSynthesis'in window)||!t)return; try{ if(!ruVoice)pickVoice(); speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="es-AR"; if(ruVoice)u.voice=ruVoice; u.rate=0.85; speechSynthesis.speak(u); }catch(e){} }
+const speakCurrent=()=>{ if(current)speak(current.ru); };
+function voiceStatus(){
+  const el=$("#voice-status"); if(!el)return;
+  if(!('speechSynthesis'in window)){ el.textContent="⚠️ Dein Browser kann nicht vorlesen"; return; }
+  pickVoice();
+  el.innerHTML = ruVoice ? ("Argentinische Stimme: <b>"+ruVoice.name+"</b> ✓") : "⚠️ Keine spanische Stimme installiert";
+}
+
+/* ============================ UI-Helfer ============================ */
+const $=s=>document.querySelector(s);
+const norm=s=>(s||"").toLowerCase().trim().replace(/ё/g,"е").replace(/[.,!?;:¿¡"']/g,"").replace(/\s+/g," ").normalize("NFD").replace(/[̀-ͯ]/g,"");
+
+let revealed=false, answered=false, cardStart=0, timerId=null;
+function startTimer(){ cardStart=Date.now(); clearInterval(timerId);
+  const upd=()=>{ const s=Math.floor((Date.now()-cardStart)/1000); $("#c-timer").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+  upd(); timerId=setInterval(upd,500); }
+function stopTimer(){ clearInterval(timerId); return (Date.now()-cardStart)/1000; }
+
+function renderStats(){ const c=counts(); $("#s-new").textContent=c.n; $("#s-learn").textContent=c.l; $("#s-due").textContent=c.d;
+  $("#flame").textContent="🔥 "+(stats.streak||0);
+  const rec=dayRec(todayStr()), goal=cfg.dailyGoal;
+  $("#goal-txt").textContent=rec.answered+" / "+goal+"  \u00b7  \ud83c\udd95 "+rec.newLearned+" gelernt";
+  $("#goal-bar").style.width=Math.min(100,Math.round(done/goal*100))+"%"; }
+
+const promptSide=c=>cfg.dir==="de2ru"?c.de:c.ru;
+const answerSide=c=>cfg.dir==="de2ru"?c.ru:c.de;
+
+function showCard(){
+  renderStats();
+  introduceIfNeeded();
+  if(queue.length===0) buildSession();                 // Pool nachfüllen, wenn Runde leer
+  if(queue.length===0){ current=null; clearInterval(timerId); showDone(); return; }
+  $("#card-area").style.display="flex"; $("#done").style.display="none";
+  current=queue.shift(); revealed=false; answered=false;
+  { const s=srsOf(current.key); if(!s.started){ s.started=true; saveSrs(); } } // freischalten
+  $("#c-cat").textContent=current.cat;
+  // Prompt (bei RU-Vorderseite Lautschrift optional)
+  const showTrFront=cfg.dir==="ru2de"&&cfg.showTr&&current.tr;
+  $("#c-prompt").innerHTML=promptSide(current)+(showTrFront?`<div class="tr">${current.tr}</div>`:"");
+  // alles ausblenden
+  $("#c-answer").classList.remove("show"); $("#c-choices").style.display="none";
+  $("#c-type").style.display="none"; $("#c-answer").style.display="";
+  $("#btn-reveal").style.display="none"; $("#grades").style.display="none";
+  $("#btn-next").style.display="none"; $("#btn-check").style.display="none";
+  startTimer();
+
+  if(cfg.mode==="karteikarte") setupKarteikarte();
+  else if(cfg.mode==="choice") setupChoice();
+  else setupTippen();
+
+  if(cfg.dir==="ru2de"&&cfg.speak) speakCurrent(); // Russisch steht vorne
+}
+
+/* ---- Modus: Karteikarte ---- */
+function setupKarteikarte(){
+  $("#c-answer").classList.remove("show");
+  $("#c-ru").className="ru"; $("#c-ru").textContent=current.ru;
+  $("#c-tr").textContent=cfg.showTr?current.tr:""; $("#c-tr").style.display=cfg.showTr?"block":"none";
+  $("#btn-reveal").style.display="block";
+  const p=preview(srsOf(current.key)); $("#iv-again").textContent=p.again; $("#iv-good").textContent=p.good;
+}
+function doReveal(){ if(!current||revealed||cfg.mode!=="karteikarte")return; revealed=true;
+  $("#c-answer").classList.add("show"); $("#btn-reveal").style.display="none"; $("#grades").style.display="grid";
+  if(cfg.dir==="de2ru"&&cfg.speak) speakCurrent(); }
+
+/* ---- Modus: Auswahl (Multiple Choice) ---- */
+function buildChoices(card){
+  const same=cards.filter(c=>c.key!==card.key&&c.cat===card.cat);
+  const pool=cards.filter(c=>c.key!==card.key);
+  const src=same.length>=3?same:pool, used=new Set([answerSide(card)]), out=[]; let guard=0;
+  while(out.length<3&&guard++<800){ const c=src[Math.floor(Math.random()*src.length)]; if(!c)break; const a=answerSide(c); if(used.has(a))continue; used.add(a); out.push(c); }
+  const opts=[card].concat(out);
+  for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+  return opts;
+}
+let choiceOpts=[];
+function setupChoice(){
+  choiceOpts=buildChoices(current);
+  const box=$("#c-choices"); box.style.display="grid"; box.innerHTML="";
+  choiceOpts.forEach((c,i)=>{
+    const b=document.createElement("button"); b.className="choice";
+    const showTr=cfg.dir==="de2ru"&&cfg.showTr&&c.tr;
+    b.innerHTML=`<kbd>${i+1}</kbd>${answerSide(c)}`+(showTr?`<small>${c.tr}</small>`:"");
+    b.onclick=()=>selectChoice(i); box.appendChild(b);
+  });
+}
+function selectChoice(i){
+  if(answered)return; answered=true;
+  const chosen=choiceOpts[i], correct=chosen.key===current.key;
+  const btns=$("#c-choices").querySelectorAll(".choice");
+  btns.forEach((b,idx)=>{ if(choiceOpts[idx].key===current.key)b.classList.add("ok"); else if(idx===i)b.classList.add("bad"); b.style.pointerEvents="none"; });
+  if(cfg.speak)speakCurrent();
+  $("#btn-next").style.display="block";
+  finishCard(correct);
+}
+
+/* ---- Modus: Tippen ---- */
+function setupTippen(){
+  $("#c-type").style.display="block"; $("#type-fb").textContent=""; $("#type-fb").className="feedback";
+  const inp=$("#type-input"); inp.value=""; inp.disabled=false;
+  $("#btn-check").style.display="block";
+  setTimeout(()=>inp.focus(),50);
+}
+function submitTyping(){
+  if(answered||cfg.mode!=="tippen")return;
+  const val=$("#type-input").value; if(!val.trim())return;
+  answered=true; $("#type-input").disabled=true;
+  const targets=cfg.dir==="de2ru"?[current.ru,current.tr]:[current.de];
+  const correct=targets.some(t=>t&&norm(t)===norm(val));
+  const fb=$("#type-fb");
+  fb.className="feedback "+(correct?"ok":"bad");
+  fb.innerHTML=correct?"✓ Richtig!":`✗ Richtig wäre: <b>${answerSide(current)}</b>`+(cfg.dir==="de2ru"&&current.tr?` (${current.tr})`:"");
+  if(cfg.speak)speakCurrent();
+  $("#btn-check").style.display="none"; $("#btn-next").style.display="block";
+  finishCard(correct);
+}
+
+/* ---- Karte abschließen (Algorithmus + Statistik) ---- */
+function finishCard(correct){
+  const elapsed=stopTimer();
+  const s=srsOf(current.key);
+  const firstTime=!s.graded; s.graded=true;
+  // Rioplatense: beim ERSTEN Mal "wusste ich" -> sofort ins Langzeit, kommt nie wieder
+  if(firstTime && correct && s.phase!=="review"){
+    const now=Date.now();
+    s.started=true; s.phase="review"; s.reps=5; s.interval=90; s.due=now+90*DAY;
+    saveSrs(); record(true,elapsed,true); renderStats(); return;
+  }
+  const wasNotReview=s.phase!=="review";
+  const g=correct?"good":"again";
+  const left=grade(current,g);
+  const becameNew=correct&&left&&wasNotReview;
+  record(correct,elapsed,becameNew);
+  if(!left) reinsert(current, !correct);
+  renderStats();
+}
+function nextCard(){ showCard(); }
+
+/* Karteikarte-Bewertung (nutzt finishCard sofort, da Antwort schon sichtbar) */
+function gradeCard(correct){ if(cfg.mode!=="karteikarte"||!revealed)return; finishCard(correct); showCard(); }
+
+function showDone(){
+  $("#card-area").style.display="none"; $("#done").style.display="flex";
+  const c=counts(); let next=Infinity, now=Date.now();
+  for(const x of cards){ const s=srs[x.key]; if(s&&s.phase==="review"&&s.due>now)next=Math.min(next,s.due); }
+  let h=""; if(c.n>0)h=`Noch <b>${c.n}</b> neue Wörter (Tageslimit erreicht). `;
+  if(next!==Infinity){ const hrs=Math.max(1,Math.round((next-now)/3600000)); h+=`Nächste Wiederholung in ~${hrs} Std.`; }
+  $("#done-hint").innerHTML=h||"Schau später wieder rein.";
+  renderStats();
+}
+
+/* ============================ Statistik-Seite ============================ */
+function renderStatsPage(){
+  const total=cards.length, learned=cards.filter(c=>srs[c.key]&&srs[c.key].phase==="review").length;
+  const neu=cards.filter(c=>!srs[c.key]||!srs[c.key].started).length;
+  const t=dayRec(todayStr());
+  const avg=stats.totalAnswered?stats.totalSeconds/stats.totalAnswered:0;
+  const perWord=stats.newLearnedTotal?stats.totalSeconds/stats.newLearnedTotal:0;
+  const restMin=perWord?Math.round(neu*perWord/60):0;
+  const totMin=Math.round(stats.totalSeconds/60);
+  const fmtT=m=>m>=60?Math.floor(m/60)+" Std "+(m%60)+" Min":m+" Min";
+  const fmtA=s=>s<60?s.toFixed(0)+" Sek":Math.floor(s/60)+":"+String(Math.round(s%60)).padStart(2,"0")+" Min";
+  const pct=total?Math.round(learned/total*100):0;
+  $("#stats-grid").innerHTML=`
+    <div class="box wide"><div class="n">${learned} / ${total} <span style="font-size:14px;color:var(--muted)">(${pct}%)</span></div><div class="l">📚 Vokabeln im Langzeitgedächtnis</div></div>
+    <div class="box"><div class="n" style="color:var(--gold)">🔥 ${stats.streak||0}</div><div class="l">Lernserie (Tage)</div></div>
+    <div class="box"><div class="n">${t.answered}</div><div class="l">Karten heute</div></div>
+    <div class="box"><div class="n">${t.newLearned}</div><div class="l">Neu gelernt heute</div></div>
+    <div class="box"><div class="n">${neu}</div><div class="l">Noch neu</div></div>
+    <div class="box"><div class="n">${fmtA(avg)}</div><div class="l">⏱ Ø pro Karte</div></div>
+    <div class="box"><div class="n">${perWord?fmtA(perWord):"—"}</div><div class="l">🚀 Ø pro Wort</div></div>
+    <div class="box"><div class="n">${restMin?fmtT(restMin):"—"}</div><div class="l">⏳ Restzeit (geschätzt)</div></div>
+    <div class="box wide"><div class="n">${fmtT(totMin)}</div><div class="l">Gesamte Lernzeit</div></div>`;
+}
+
+/* ============================ Navigation ============================ */
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+    const v=b.dataset.view; document.querySelectorAll(".view").forEach(s=>s.classList.remove("active")); $("#view-"+v).classList.add("active");
+    if(v==="list")renderList(); if(v==="stats")renderStatsPage(); if(v==="settings")voiceStatus();
+    if(v==="study"){ buildSession(); showCard(); }
+  };
+});
+
+/* Buttons */
+$("#btn-reveal").onclick=doReveal;
+$("#btn-speak").onclick=speakCurrent;
+$("#btn-next").onclick=nextCard;
+$("#btn-check").onclick=submitTyping;
+document.querySelectorAll(".grade").forEach(b=>b.onclick=()=>gradeCard(b.dataset.g==="good"));
+$("#btn-extra").onclick=()=>{ extraMode=true; buildSession(); showCard(); };
+$("#type-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); if(!answered)submitTyping(); else nextCard(); } });
+
+/* Tastatur:  ↓ = aufdecken · ← = wusste ich nicht · → = wusste ich · 1-4 = Auswahl · Enter = weiter */
+document.addEventListener("keydown",e=>{
+  if(!$("#view-study").classList.contains("active")||!current)return;
+  if(document.activeElement===$("#type-input"))return; // Tippen-Feld hat eigenes Handling
+  if(cfg.mode==="karteikarte"){
+    if(!revealed){ if(["ArrowDown","Space","Enter","ArrowUp"].includes(e.code)||e.key==="Enter"){ e.preventDefault(); doReveal(); } }
+    else{ if(e.key==="ArrowLeft"){ e.preventDefault(); gradeCard(false); } else if(e.key==="ArrowRight"){ e.preventDefault(); gradeCard(true); } else if(e.code==="Space"){ e.preventDefault(); speakCurrent(); } }
+  } else if(cfg.mode==="choice"){
+    if(!answered){ if(["1","2","3","4"].includes(e.key)){ e.preventDefault(); const i=+e.key-1; if(i<choiceOpts.length)selectChoice(i); } }
+    else{ if(e.key==="Enter"||e.key==="ArrowRight"||e.code==="Space"){ e.preventDefault(); nextCard(); } }
+  } else if(cfg.mode==="tippen"){
+    if(answered&&(e.key==="Enter"||e.key==="ArrowRight")){ e.preventDefault(); nextCard(); }
+  }
+});
+
+/* ============================ Wörter-Liste ============================ */
+function renderCatFilter(){ const cats=[...new Set(cards.map(c=>c.cat))].sort(); $("#filter-cat").innerHTML=`<option value="">Alle Kategorien</option>`+cats.map(c=>`<option>${c}</option>`).join(""); }
+function renderList(){
+  renderCatFilter();
+  const q=$("#search").value.toLowerCase().trim(), cat=$("#filter-cat").value, list=$("#wordlist"); list.innerHTML=""; let n=0;
+  for(const c of cards){
+    if(cat&&c.cat!==cat)continue;
+    if(q&&!(c.de.toLowerCase().includes(q)||c.ru.toLowerCase().includes(q)||c.tr.toLowerCase().includes(q)))continue;
+    n++; const s=srs[c.key];
+    const state=!s||s.phase==="new"?"neu":s.phase==="review"?(s.due<=Date.now()?"fällig":"gelernt"):"lernen";
+    const el=document.createElement("div"); el.className="word";
+    el.innerHTML=`<div class="de">${c.de}</div><div class="rw">${c.ru}<small>${c.tr||""}</small></div><span class="st">${state}</span><button class="del">×</button>`;
+    el.querySelector(".del").onclick=()=>deleteWord(c); list.appendChild(el);
+  }
+  $("#list-count").textContent=`${n} Wörter`;
+}
+$("#search").oninput=renderList; $("#filter-cat").onchange=renderList;
+function persistExtra(){ extra=cards.filter(c=>!SEED.some(s=>keyOf(s)===c.key)).map(c=>[c.de,c.ru,c.tr,c.cat]); saveJSON(DB_KEY,extra); }
+function deleteWord(c){ if(!confirm(`„${c.de}" löschen?`))return; cards=cards.filter(x=>x.key!==c.key); delete srs[c.key]; saveSrs(); persistExtra(); renderList(); }
+
+/* Hinzufügen / Import */
+$("#btn-add").onclick=()=>{ const de=$("#add-de").value.trim(),ru=$("#add-ru").value.trim(); if(!de||!ru){alert("Deutsch und Russisch sind Pflicht.");return;}
+  const w=[de,ru,$("#add-tr").value.trim(),$("#add-cat").value.trim()||"Eigene"],key=keyOf(w);
+  if(cards.some(c=>c.key===key)){alert("Gibt es schon.");return;}
+  cards.push({de:w[0],ru:w[1],tr:w[2],cat:w[3],key}); persistExtra();
+  $("#add-de").value=$("#add-ru").value=$("#add-tr").value=$("#add-cat").value=""; alert("Hinzugefügt ✓"); };
+$("#btn-import").onclick=()=>{ const lines=$("#import-box").value.split("\n").map(l=>l.trim()).filter(Boolean); let a=0,s=0;
+  for(const line of lines){ const p=line.split(/\t|;/).map(x=>x.trim()); if(p.length<2||!p[0]||!p[1]){s++;continue;}
+    const w=[p[0],p[1],p[2]||"",p[3]||"Import"],key=keyOf(w); if(cards.some(c=>c.key===key)){s++;continue;}
+    cards.push({de:w[0],ru:w[1],tr:w[2],cat:w[3],key}); a++; }
+  persistExtra(); $("#import-msg").innerHTML=`<b>${a}</b> hinzugefügt, ${s} übersprungen.`; $("#import-box").value=""; };
+
+/* Einstellungen */
+function initSeg(id,attr,val,cb){ document.querySelectorAll(`#${id} button`).forEach(b=>{ b.classList.toggle("on",b.dataset[attr]==String(val));
+  b.onclick=()=>{ document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on")); b.classList.add("on"); cb(b.dataset[attr]); }; }); }
+initSeg("seg-dir","dir",cfg.dir,v=>{cfg.dir=v;saveCfg();});
+initSeg("seg-tr","tr",cfg.showTr?"1":"0",v=>{cfg.showTr=v==="1";saveCfg();});
+initSeg("seg-speak","speak",cfg.speak?"1":"0",v=>{cfg.speak=v==="1";saveCfg();});
+initSeg("seg-new","new",cfg.poolSize,v=>{cfg.poolSize=+v;saveCfg();buildSession();renderStats();});
+initSeg("seg-goal","goal",cfg.dailyGoal,v=>{cfg.dailyGoal=+v;saveCfg();renderStats();});
+$("#btn-reset").onclick=()=>{ if(!confirm("Gesamten Lernstand löschen? (Eigene Wörter bleiben.)"))return; srs={};saveSrs();buildSession();showCard();alert("Zurückgesetzt."); };
+$("#btn-reset-stats").onclick=()=>{ if(!confirm("Statistik & Lernserie zurücksetzen?"))return; stats={streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,days:{}};saveStats();renderStatsPage();renderStats(); };
+$("#btn-export").onclick=()=>{ const blob=new Blob([JSON.stringify({cards:extra,srs,cfg,stats},null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="russisch-lernstand.json"; a.click(); };
+$("#btn-testvoice").onclick=()=>{ pickVoice(); speak("Hola, ¿qué hacés?"); setTimeout(voiceStatus,200);
+  if(!ruVoice) alert("Es ist keine spanische Stimme installiert.\n\nSo bekommst du sie (Mac):\nSystemeinstellungen → Bedienungshilfen → Gesprochene Inhalte → Systemstimme → „Verwalten…\" → Russisch (z. B. „Milena\" oder „Yuri\") laden.\nDanach den Browser einmal neu starten.\n\niPhone/iPad: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Spanisch (Argentinien)."); };
+
+
+/* ============================ Cloud-Sync (Firebase Realtime DB, REST) ============================ */
+const SYNC_PREFIX=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_");
+let syncUrl=localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
+let syncCode=localStorage.getItem(SYNC_PREFIX+"sync_code")||"";
+let syncTimer=null, syncBusy=false;
+function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; return syncUrl.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode)+".json"; }
+function setSyncStatus(t){ const el=document.querySelector("#sync-status"); if(el) el.textContent=t; const d=document.querySelector("#sync-dot"); if(d) d.style.color=syncEndpoint()?"var(--good)":"var(--muted)"; }
+function localState(){ return {srs:srs, stats:stats, extra:extra, updatedAt:Date.now()}; }
+function rankSrs(s){ if(!s)return -1; if(s.phase==="review")return 3; if(s.started)return 2; return 1; }
+function mergeSrs(a,b){ const out=Object.assign({},a||{}); for(const k in (b||{})){ const x=out[k], y=b[k];
+  if(!x){ out[k]=y; continue; }
+  const rx=rankSrs(x), ry=rankSrs(y);
+  if(ry>rx || (ry===rx && (y.interval||0)>(x.interval||0)) || (ry===rx && (y.interval||0)===(x.interval||0) && (y.due||0)>(x.due||0))) out[k]=y;
+ } return out; }
+function mergeStats(a,b){ a=a||{}; b=b||{}; const out=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,days:{}}, a);
+  out.streak=Math.max(a.streak||0,b.streak||0);
+  out.totalSeconds=Math.max(a.totalSeconds||0,b.totalSeconds||0);
+  out.totalAnswered=Math.max(a.totalAnswered||0,b.totalAnswered||0);
+  out.newLearnedTotal=Math.max(a.newLearnedTotal||0,b.newLearnedTotal||0);
+  out.lastActiveDay=((a.lastActiveDay||"")>(b.lastActiveDay||""))?a.lastActiveDay:b.lastActiveDay;
+  out.days=Object.assign({}, a.days||{}); const bd=b.days||{};
+  for(const d in bd){ const x=out.days[d], y=bd[d]; if(!x){ out.days[d]=y; continue; }
+    out.days[d]={answered:Math.max(x.answered||0,y.answered||0),correct:Math.max(x.correct||0,y.correct||0),newLearned:Math.max(x.newLearned||0,y.newLearned||0),seconds:Math.max(x.seconds||0,y.seconds||0)}; }
+  return out; }
+async function syncPull(apply){
+  const url=syncEndpoint(); if(!url) return null;
+  try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw 0; const remote=await r.json();
+    if(remote && (remote.srs||remote.stats)){
+      if(apply){ srs=mergeSrs(srs, remote.srs||{}); stats=mergeStats(stats, remote.stats||{});
+        if(remote.extra && remote.extra.length){ const have=new Set(cards.map(c=>c.key));
+          for(const w of remote.extra){ const key=w[0]+"|"+w[1]; if(!have.has(key)){ cards.push({de:w[0],ru:w[1],tr:w[2]||"",cat:w[3]||"Import",key}); have.add(key); } }
+          extra=cards.filter(c=>!SEED.some(s=>keyOf(s)===c.key)).map(c=>[c.de,c.ru,c.tr,c.cat]); saveJSON(DB_KEY,extra); }
+        saveJSON(SRS_KEY,srs); saveJSON(STAT_KEY,stats);
+      }
+      return remote;
+    }
+  }catch(e){}
+  return null;
+}
+async function syncPush(){
+  const url=syncEndpoint(); if(!url) return;
+  try{ syncBusy=true; setSyncStatus("Synchronisiere…");
+    const r=await fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(localState())});
+    if(!r.ok) throw 0;
+    setSyncStatus("Sync aktiv ✓");
+  }catch(e){ setSyncStatus("⚠️ Sync-Fehler – URL/Code prüfen"); }
+  finally{ syncBusy=false; }
+}
+function scheduleSync(){ if(!syncEndpoint())return; clearTimeout(syncTimer); syncTimer=setTimeout(syncPush,1500); }
+async function syncInit(){
+  if(!syncEndpoint()){ setSyncStatus("Nicht verbunden"); return; }
+  setSyncStatus("Lade…"); await syncPull(true); renderStats(); buildSession(); showCard(); await syncPush();
+}
+window.addEventListener("focus", ()=>{ if(syncEndpoint()&&!syncBusy){ syncPull(true).then(r=>{ if(r) renderStats(); }); } });
+(function(){ const u=document.querySelector("#sync-url"), c=document.querySelector("#sync-code");
+  if(u)u.value=syncUrl; if(c)c.value=syncCode;
+  const b=document.querySelector("#btn-sync-connect"); if(b) b.onclick=async()=>{
+    syncUrl=((u&&u.value)||"").trim(); syncCode=((c&&c.value)||"").trim();
+    localStorage.setItem(SYNC_PREFIX+"sync_url",syncUrl); localStorage.setItem(SYNC_PREFIX+"sync_code",syncCode);
+    if(!syncEndpoint()){ setSyncStatus("Bitte URL und Code eingeben"); return; }
+    setSyncStatus("Verbinde…"); await syncPull(true); renderStats(); buildSession(); showCard(); await syncPush();
+  };
+  setSyncStatus(syncEndpoint()?"Bereit":"Nicht verbunden");
+})();
+
+/* START */
+if(syncEndpoint()){ buildSession(); showCard(); syncInit(); } else { buildSession(); showCard(); }
+</script>
+</body>
+</html>
