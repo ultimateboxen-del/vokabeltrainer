@@ -913,7 +913,7 @@ function mergeStats(a,b){ a=a||{}; b=b||{}; const out=Object.assign({streak:0,la
   return out; }
 async function syncPull(apply){
   const url=syncEndpoint(); if(!url) return null;
-  try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw 0; const remote=await r.json();
+  try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw 0; let remote=await r.json(); if(remote && typeof remote.blob==="string"){ try{ remote=JSON.parse(remote.blob); }catch(e){ remote=null; } }
     if(remote && (remote.srs||remote.stats)){
       if(apply){ srs=mergeSrs(srs, remote.srs||{}); stats=mergeStats(stats, remote.stats||{});
         if(remote.extra && remote.extra.length){ const have=new Set(cards.map(c=>c.key));
@@ -929,7 +929,7 @@ async function syncPull(apply){
 async function syncPush(){
   const url=syncEndpoint(); if(!url) return;
   try{ syncBusy=true; setSyncStatus("Synchronisiere…");
-    const r=await fetch(url,{method:"PUT",body:JSON.stringify(localState())});
+    const r=await fetch(url,{method:"PUT",body:JSON.stringify({blob:JSON.stringify(localState()),updatedAt:Date.now()})});
     if(!r.ok){ setSyncStatus("⚠️ Server "+r.status+" – Firebase-Regeln prüfen"); return; }
     setSyncStatus("Sync aktiv ✓ "+new Date().toLocaleTimeString());
   }catch(e){ setSyncStatus("⚠️ Keine Verbindung – App über den github.io-Link öffnen (nicht als Datei)"); }
@@ -952,7 +952,7 @@ window.addEventListener("focus", ()=>{ if(syncEndpoint()&&!syncBusy){ syncPull(t
     try{
       const g=await fetch(ep,{cache:"no-store"}); if(!g.ok){ setSyncStatus("⚠️ Lesen "+g.status+" – Firebase-Regeln prüfen"); return; }
       await syncPull(true); renderStats(); buildSession(); showCard();
-      const p=await fetch(ep,{method:"PUT",body:JSON.stringify(localState())}); if(!p.ok){ setSyncStatus("⚠️ Schreiben "+p.status); return; }
+      const p=await fetch(ep,{method:"PUT",body:JSON.stringify({blob:JSON.stringify(localState()),updatedAt:Date.now()})}); if(!p.ok){ setSyncStatus("⚠️ Schreiben "+p.status); return; }
       setSyncStatus("Sync aktiv ✓");
     }catch(e){ setSyncStatus("⚠️ Keine Verbindung: "+((e&&e.message)||e)+" — App über den github.io-Link öffnen"); }
   };
