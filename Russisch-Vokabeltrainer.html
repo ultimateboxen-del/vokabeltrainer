@@ -1033,7 +1033,7 @@ const SYNC_PREFIX=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_"
 let syncUrl=localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
 let syncCode=localStorage.getItem(SYNC_PREFIX+"sync_code")||"";
 let syncTimer=null, syncBusy=false;
-function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; return syncUrl.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode)+".json"; }
+function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; return syncUrl.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode)+"/"+SYNC_PREFIX.replace(/_$/,"")+".json"; }
 function setSyncStatus(t){ const el=document.querySelector("#sync-status"); if(el) el.textContent=t; const d=document.querySelector("#sync-dot"); if(d) d.style.color=syncEndpoint()?"var(--good)":"var(--muted)"; }
 function localState(){ return {srs:srs, stats:stats, extra:extra, updatedAt:Date.now()}; }
 function rankSrs(s){ if(!s)return -1; if(s.phase==="review")return 3; if(s.started)return 2; return 1; }
