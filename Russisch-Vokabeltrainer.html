@@ -251,6 +251,7 @@
       <div class="seg small" id="seg-speak"><button data-speak="1" class="on">An</button><button data-speak="0">Aus</button></div></div>
     <div class="switchrow"><span id="voice-status" style="font-weight:400; font-size:13px">Stimme: wird geprüft…</span>
       <button class="btn ghost" id="btn-testvoice" style="padding:8px 12px; white-space:nowrap">🔊 Testen</button></div>
+    <div class="switchrow" style="flex-direction:column; align-items:stretch; gap:8px"><span>Stimme wählen</span><select id="voice-select"></select></div>
     <div class="switchrow"><span>Wörter gleichzeitig im Pool</span>
       <div class="seg small" id="seg-new"><button data-new="10">10</button><button data-new="20" class="on">20</button><button data-new="40">40</button><button data-new="9999">Alle</button></div></div>
     <div class="switchrow"><span>Tagesziel (Karten)</span>
@@ -890,10 +891,19 @@ function record(correct,elapsed,becameNew){
 
 /* ============================ Sprachausgabe ============================ */
 let ruVoice=null;
-function pickVoice(){ if(!('speechSynthesis'in window))return; const vs=speechSynthesis.getVoices(); ruVoice=vs.find(v=>/ru[-_]?RU/i.test(v.lang))||vs.find(v=>/^ru/i.test(v.lang))||null; }
-if('speechSynthesis'in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
-function speak(t){ if(!('speechSynthesis'in window)||!t)return; try{ if(!ruVoice)pickVoice(); speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="ru-RU"; if(ruVoice)u.voice=ruVoice; u.rate=0.85; speechSynthesis.speak(u); }catch(e){} }
+const VOICE_LANG="ru", VOICE_REGION="RU";
+let chosenVoiceName=localStorage.getItem(SYNC_PREFIX+"voice")||"";
+function pickVoice(){ if(!("speechSynthesis"in window))return; const vs=speechSynthesis.getVoices();
+  if(chosenVoiceName){ const v=vs.find(x=>x.name===chosenVoiceName); if(v){ ruVoice=v; return; } }
+  ruVoice = vs.find(v=>new RegExp("^"+VOICE_LANG+"[-_]?"+VOICE_REGION,"i").test(v.lang)) || vs.find(v=>new RegExp("^"+VOICE_LANG,"i").test(v.lang)) || null; }
+function listVoices(){ if(!("speechSynthesis"in window))return []; return speechSynthesis.getVoices().filter(v=>new RegExp("^"+VOICE_LANG,"i").test(v.lang)); }
+if('speechSynthesis'in window){ pickVoice(); speechSynthesis.onvoiceschanged=function(){ pickVoice(); fillVoiceSelect(); }; }
+function speak(t){ if(!('speechSynthesis'in window)||!t)return; try{ if(!ruVoice)pickVoice(); speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang=(ruVoice&&ruVoice.lang)||(VOICE_LANG+"-"+VOICE_REGION); if(ruVoice)u.voice=ruVoice; u.rate=0.85; speechSynthesis.speak(u); }catch(e){} }
 const speakCurrent=()=>{ if(current)speak(current.ru); };
+function fillVoiceSelect(){ const sel=$("#voice-select"); if(!sel)return; const vs=listVoices();
+  if(!vs.length){ sel.innerHTML='<option value="">(keine passende Stimme installiert)</option>'; return; }
+  sel.innerHTML='<option value="">Automatisch (beste)</option>'+vs.map(function(v){return '<option value="'+v.name.replace(/"/g,"")+'"'+(v.name===chosenVoiceName?" selected":"")+'>'+v.name+" ("+v.lang+")</option>";}).join("");
+  sel.onchange=function(){ chosenVoiceName=sel.value; localStorage.setItem(SYNC_PREFIX+"voice",chosenVoiceName); pickVoice(); speak(VOICE_LANG==="ru"?"Привет, как дела?":"Hola, ¿qué tal?"); voiceStatus(); }; }
 function voiceStatus(){
   const el=$("#voice-status"); if(!el)return;
   if(!('speechSynthesis'in window)){ el.textContent="⚠️ Dein Browser kann nicht vorlesen"; return; }
@@ -1087,7 +1097,7 @@ document.querySelectorAll("nav button").forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active")); b.classList.add("active");
     const v=b.dataset.view; document.querySelectorAll(".view").forEach(s=>s.classList.remove("active")); $("#view-"+v).classList.add("active");
-    if(v==="list")renderList(); if(v==="stats")renderStatsPage(); if(v==="settings")voiceStatus();
+    if(v==="list")renderList(); if(v==="stats")renderStatsPage(); if(v==="settings"){ voiceStatus(); fillVoiceSelect(); }
     if(v==="study"){ buildSession(); showCard(); }
   };
 });
