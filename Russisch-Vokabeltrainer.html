@@ -127,6 +127,11 @@
   .seg.small{width:auto; margin:0}
   .seg.small button{padding:8px 12px}
   footer{text-align:center; color:var(--muted); font-size:11px; padding:8px}
+  #card{ touch-action:pan-y; }
+  #card.snap{ transition:transform .25s cubic-bezier(.2,.7,.3,1); }
+  .swipe-hint{ position:absolute; top:14px; font-size:15px; font-weight:900; padding:6px 12px; border-radius:12px; opacity:0; pointer-events:none; z-index:3; border:2px solid; }
+  .swipe-hint.right{ left:14px; color:var(--good); border-color:var(--good); transform:rotate(-8deg); }
+  .swipe-hint.left{ right:14px; color:var(--again); border-color:var(--again); transform:rotate(8deg); }
 </style>
 </head>
 <body>
@@ -160,6 +165,8 @@
       <div class="card" id="card">
         <div class="cat" id="c-cat"></div>
         <div class="timer" id="c-timer">0:00</div>
+        <div class="swipe-hint right" id="sh-right">KENNE ICH ✓</div>
+        <div class="swipe-hint left" id="sh-left">✗ NICHT</div>
         <div class="prompt" id="c-prompt">—</div>
 
         <!-- Karteikarte: Antwort -->
@@ -666,7 +673,113 @@ const SEED = [
  ["Dach","крыша","krýsha","Nomen"],
  ["Bad","ванная","vánnaja","Orte"],
  ["legen","класть","klast'","Verben"],
- ["stellen","ставить","stávit'","Verben"]
+ ["stellen","ставить","stávit'","Verben"],
+ // ==== Block C ====
+ ["sollen / müssen","должен","dólzhyn","Verben"],
+ ["dürfen / erlaubt","можно","mózhna","Verben"],
+ ["gefallen","нравиться","nrávitsa","Verben"],
+ ["passieren","случаться","sluchátsa","Verben"],
+ ["scheinen / wirken","казаться","kazátsa","Verben"],
+ ["sich anziehen","одеваться","adivátsa","Verben"],
+ ["sich waschen","мыться","mýtsa","Verben"],
+ ["sich ausruhen","отдыхать","addykhát'","Verben"],
+ ["spazieren gehen","гулять","gulját'","Verben"],
+ ["erkennen","узнавать","uznavát'","Verben"],
+ ["bemerken","замечать","zamichát'","Verben"],
+ ["entscheiden","решать","rishát'","Verben"],
+ ["erlauben","разрешать","razrishát'","Verben"],
+ ["verbieten","запрещать","zaprishchát'","Verben"],
+ ["retten","спасать","spasát'","Verben"],
+ ["werfen","бросать","brasát'","Verben"],
+ ["fallen","падать","pádat'","Verben"],
+ ["wachsen","расти","rastí","Verben"],
+ ["sich ändern","меняться","minjátsa","Verben"],
+ ["teilen","делить","dilít'","Verben"],
+ ["sammeln","собирать","sabirát'","Verben"],
+ ["sparen","экономить","ikanómit'","Verben"],
+ ["verdienen","зарабатывать","zarabátyvat'","Verben"],
+ ["ausgeben (Geld)","тратить","trátit'","Verben"],
+ ["mieten","снимать","snimát'","Verben"],
+ ["wünschen","желать","zhilát'","Verben"],
+ ["danken","благодарить","blagadarít'","Verben"],
+ ["grüßen","здороваться","zdaróvatsa","Verben"],
+ ["sich gewöhnen","привыкать","privykát'","Verben"],
+ ["unterschreiben","подписывать","patpísyvat'","Verben"],
+ ["weitermachen","продолжать","pradalzhát'","Verben"],
+ ["aufhören","переставать","pirestavát'","Verben"],
+ ["Schule","школа","shkóla","Nomen"],
+ ["Universität","университет","univirsitét","Nomen"],
+ ["Student","студент","studént","Nomen"],
+ ["Satz","предложение","pridlazhénije","Nomen"],
+ ["Buchstabe","буква","búkva","Nomen"],
+ ["Zahl","число","chisló","Nomen"],
+ ["Beruf","профессия","prafésija","Nomen"],
+ ["Firma","компания","kampánija","Nomen"],
+ ["Büro","офис","ófis","Nomen"],
+ ["Zeitung","газета","gazéta","Nomen"],
+ ["Nachricht","новость","nóvast'","Nomen"],
+ ["Fernseher","телевизор","tilivízar","Nomen"],
+ ["Insel","остров","óstraf","Nomen"],
+ ["See (Gewässer)","озеро","ózira","Nomen"],
+ ["Strand","пляж","pljazh","Nomen"],
+ ["Feld","поле","póle","Nomen"],
+ ["Brücke","мост","most","Nomen"],
+ ["Kirche","церковь","tsérkaf'","Nomen"],
+ ["Park","парк","park","Orte"],
+ ["Platz","площадь","plóshchit'","Orte"],
+ ["Ecke","угол","úgal","Orte"],
+ ["Reis","рис","ris","Essen"],
+ ["Kartoffel","картошка","kartóshka","Essen"],
+ ["Tomate","помидор","pamidór","Essen"],
+ ["Zwiebel","лук","luk","Essen"],
+ ["Butter","масло","másla","Essen"],
+ ["Kuchen","торт","tort","Essen"],
+ ["Eis (Speise)","мороженое","marózhynaje","Essen"],
+ ["Schokolade","шоколад","shykalát","Essen"],
+ ["Hähnchen","курица","kúritsa","Essen"],
+ ["Saft","сок","sok","Essen"],
+ ["Orange","апельсин","apil'sín","Essen"],
+ ["Banane","банан","banán","Essen"],
+ ["Sekunde","секунда","sikúnda","Zeit"],
+ ["Wochenende","выходные","vykhadnýje","Zeit"],
+ ["Frühling","весна","visná","Zeit"],
+ ["Sommer","лето","léta","Zeit"],
+ ["Herbst","осень","ósin'","Zeit"],
+ ["Winter","зима","zimá","Zeit"],
+ ["Geburtstag","день рождения","den' razhdénija","Zeit"],
+ ["Feiertag","праздник","prázdnik","Zeit"],
+ ["dunkel","тёмный","tyómnyj","Adjektiv"],
+ ["hell","светлый","svétlyj","Adjektiv"],
+ ["tief","глубокий","glubókij","Adjektiv"],
+ ["dick","толстый","tólstyj","Adjektiv"],
+ ["dünn","тонкий","tónkij","Adjektiv"],
+ ["hart","твёрдый","tvyórdyj","Adjektiv"],
+ ["weich","мягкий","mjákhkij","Adjektiv"],
+ ["laut","громкий","grómkij","Adjektiv"],
+ ["leise","тихий","tíkhij","Adjektiv"],
+ ["süß","сладкий","slátkij","Adjektiv"],
+ ["sauer","кислый","kíslyj","Adjektiv"],
+ ["nass","мокрый","mókryj","Adjektiv"],
+ ["trocken","сухой","sukhój","Adjektiv"],
+ ["gleich (identisch)","одинаковый","adinákavyj","Adjektiv"],
+ ["verschieden","разный","ráznyj","Adjektiv"],
+ ["fertig","готовый","gatóvyj","Adjektiv"],
+ ["freundlich","добрый","dóbryj","Adjektiv"],
+ ["lustig","весёлый","visyólyj","Adjektiv"],
+ ["langweilig","скучный","skúshnyj","Adjektiv"],
+ ["interessant","интересный","intirésnyj","Adjektiv"],
+ ["nötig","нужный","núzhnyj","Adjektiv"],
+ ["ähnlich","похожий","pakhózhyj","Adjektiv"],
+ ["nächste","следующий","sléduyushchij","Adjektiv"],
+ ["wahrscheinlich","наверное","navérnaje","Adverb"],
+ ["zuerst","сначала","snachála","Adverb"],
+ ["draußen","на улице","na úlitse","Adverb"],
+ ["drinnen","внутри","vnutrí","Adverb"],
+ ["überhaupt","вообще","vabshché","Adverb"],
+ ["sogar","даже","dázhe","Adverb"],
+ ["kaum","едва","jidvá","Adverb"],
+ ["trotzdem","всё равно","fsyo ravnó","Adverb"],
+ ["zum Beispiel","например","naprimér","Adverb"]
 ];
 
 /* ============================ Speicher ============================ */
@@ -683,7 +796,7 @@ let extra=loadJSON(DB_KEY,[]);
 let cards=SEED.concat(extra).map(w=>({de:w[0],ru:w[1],tr:w[2]||"",cat:w[3]||"Allgemein",key:keyOf(w)}));
 let srs=loadJSON(SRS_KEY,{});
 const SEED_VERSION="2026-07-10-grund"; if(localStorage.getItem("rvt_seedver")!==SEED_VERSION){ srs={}; try{localStorage.removeItem(SRS_KEY);}catch(e){} localStorage.setItem("rvt_seedver",SEED_VERSION); }
-let stats=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,days:{}},loadJSON(STAT_KEY,{}));
+let stats=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,knownTotal:0,days:{}},loadJSON(STAT_KEY,{}));
 
 function srsOf(k){ if(!srs[k]) srs[k]={reps:0,interval:0,due:0,phase:"new",step:0,lapses:0}; return srs[k]; }
 const saveSrs=()=>{ saveJSON(SRS_KEY,srs); scheduleSync(); };
@@ -801,7 +914,7 @@ function stopTimer(){ clearInterval(timerId); return (Date.now()-cardStart)/1000
 function renderStats(){ const c=counts(); $("#s-new").textContent=c.n; $("#s-learn").textContent=c.l; $("#s-due").textContent=c.d;
   $("#flame").textContent="🔥 "+(stats.streak||0);
   const rec=dayRec(todayStr()), goal=cfg.dailyGoal;
-  $("#goal-txt").textContent=rec.answered+" / "+goal+"  \u00b7  \ud83c\udd95 "+rec.newLearned+" gelernt";
+  $("#goal-txt").textContent=rec.answered+" / "+goal+"  \u00b7  \ud83c\udd95 "+rec.newLearned+" neu heute"+((stats.knownTotal)?("  · 💡 "+stats.knownTotal+" gekonnt"):"");
   $("#goal-bar").style.width=Math.min(100,Math.round(done/goal*100))+"%"; }
 
 const promptSide=c=>cfg.dir==="de2ru"?c.de:c.ru;
@@ -925,26 +1038,48 @@ function showDone(){
 
 /* ============================ Statistik-Seite ============================ */
 function renderStatsPage(){
-  const total=cards.length, learned=cards.filter(c=>srs[c.key]&&srs[c.key].phase==="review").length;
-  const neu=cards.filter(c=>!srs[c.key]||!srs[c.key].started).length;
+  const total=cards.length;
+  let locked=0,learning=0,ltFresh=0,ltMid=0,ltStrong=0;
+  for(const c of cards){ const s=srs[c.key];
+    if(!s||!s.started) locked++;
+    else if(s.phase!=="review") learning++;
+    else { const iv=s.interval||0; if(iv>=16) ltStrong++; else if(iv>=4) ltMid++; else ltFresh++; } }
+  const lt=ltFresh+ltMid+ltStrong;
   const t=dayRec(todayStr());
   const avg=stats.totalAnswered?stats.totalSeconds/stats.totalAnswered:0;
   const perWord=stats.newLearnedTotal?stats.totalSeconds/stats.newLearnedTotal:0;
-  const restMin=perWord?Math.round(neu*perWord/60):0;
+  const restMin=perWord?Math.round(locked*perWord/60):0;
   const totMin=Math.round(stats.totalSeconds/60);
   const fmtT=m=>m>=60?Math.floor(m/60)+" Std "+(m%60)+" Min":m+" Min";
   const fmtA=s=>s<60?s.toFixed(0)+" Sek":Math.floor(s/60)+":"+String(Math.round(s%60)).padStart(2,"0")+" Min";
-  const pct=total?Math.round(learned/total*100):0;
+  const pct=total?Math.round(lt/total*100):0;
+  const p=n=>total?(n/total*100):0;
   $("#stats-grid").innerHTML=`
-    <div class="box wide"><div class="n">${learned} / ${total} <span style="font-size:14px;color:var(--muted)">(${pct}%)</span></div><div class="l">📚 Vokabeln im Langzeitgedächtnis</div></div>
+    <div class="box wide">
+      <div class="l" style="margin-bottom:8px">Fortschritt nach Phase · ${total} Wörter gesamt</div>
+      <div style="display:flex;height:18px;border-radius:9px;overflow:hidden;border:1px solid var(--line)">
+        <div style="width:${p(locked)}%;background:var(--line)"></div>
+        <div style="width:${p(learning)}%;background:var(--gold)"></div>
+        <div style="width:${p(ltFresh)}%;background:#7cc79a"></div>
+        <div style="width:${p(ltMid)}%;background:#4caf72"></div>
+        <div style="width:${p(ltStrong)}%;background:#2e7d52"></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:13px">
+        <span>🔒 Gesperrt <b>${locked}</b></span>
+        <span style="color:var(--gold)">📚 Am Lernen <b>${learning}</b></span>
+        <span style="color:var(--good)">✅ Gelernt <b>${lt}</b></span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">„Gelernt" = im Langzeitgedächtnis. Davon: frisch ${ltFresh} · gefestigt ${ltMid} · fest verankert ${ltStrong}</div>
+    </div>
+    <div class="box"><div class="n" style="color:var(--good)">${lt} <span style="font-size:14px;color:var(--muted)">(${pct}%)</span></div><div class="l">✅ Gelernt (Langzeit)</div></div>
     <div class="box"><div class="n" style="color:var(--gold)">🔥 ${stats.streak||0}</div><div class="l">Lernserie (Tage)</div></div>
     <div class="box"><div class="n">${t.answered}</div><div class="l">Karten heute</div></div>
-    <div class="box"><div class="n">${t.newLearned}</div><div class="l">Neu gelernt heute</div></div>
-    <div class="box"><div class="n">${neu}</div><div class="l">Noch neu</div></div>
+    <div class="box"><div class="n">${t.newLearned}</div><div class="l">Neu ins Langzeit (heute)</div></div>
+    ${stats.knownTotal?('<div class="box"><div class="n">'+stats.knownTotal+'</div><div class="l">💡 Schon gekonnt</div></div>'):''}
     <div class="box"><div class="n">${fmtA(avg)}</div><div class="l">⏱ Ø pro Karte</div></div>
     <div class="box"><div class="n">${perWord?fmtA(perWord):"—"}</div><div class="l">🚀 Ø pro Wort</div></div>
     <div class="box"><div class="n">${restMin?fmtT(restMin):"—"}</div><div class="l">⏳ Restzeit (geschätzt)</div></div>
-    <div class="box wide"><div class="n">${fmtT(totMin)}</div><div class="l">Gesamte Lernzeit</div></div>`;
+    <div class="box"><div class="n">${fmtT(totMin)}</div><div class="l">Gesamte Lernzeit</div></div>`;
 }
 
 /* ============================ Navigation ============================ */
@@ -1029,6 +1164,24 @@ $("#btn-testvoice").onclick=()=>{ pickVoice(); speak("Привет"); setTimeout
   if(!ruVoice) alert("Es ist keine russische Stimme installiert.\n\nSo bekommst du sie (Mac):\nSystemeinstellungen → Bedienungshilfen → Gesprochene Inhalte → Systemstimme → „Verwalten…\" → Russisch (z. B. „Milena\" oder „Yuri\") laden.\nDanach den Browser einmal neu starten.\n\niPhone/iPad: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Russisch."); };
 
 
+function toast(msg){ let t=document.querySelector("#vt-toast"); if(!t){ t=document.createElement("div"); t.id="vt-toast"; t.style.cssText="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--good);color:#fff;padding:10px 16px;border-radius:20px;font-weight:800;font-size:14px;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none"; document.body.appendChild(t);} t.textContent=msg; t.style.opacity="1"; clearTimeout(t._h); t._h=setTimeout(function(){t.style.opacity="0";},1100); }
+(function(){ const card=document.querySelector("#card"); if(!card||!window.PointerEvent) return;
+  const R=()=>document.querySelector("#sh-right"), L=()=>document.querySelector("#sh-left");
+  let sx=0,sy=0,drag=false,sw=false,pid=null; const TH=80;
+  function center(anim){ card.classList.toggle("snap",!!anim); card.style.transform=""; if(R())R().style.opacity=0; if(L())L().style.opacity=0; if(anim) setTimeout(()=>card.classList.remove("snap"),260); }
+  function fly(right){ card.classList.add("snap"); card.style.transform="translateX("+(right?640:-640)+"px) rotate("+(right?24:-24)+"deg)"; if(R())R().style.opacity=0; if(L())L().style.opacity=0;
+    setTimeout(function(){ card.classList.remove("snap"); card.style.transform=""; if(!revealed) doReveal(); gradeCard(right); },170); }
+  card.addEventListener("pointerdown",function(e){ if(cfg.mode!=="karteikarte")return; const t=e.target; if(t&&t.closest&&t.closest("button,input,a"))return; drag=true; sw=false; sx=e.clientX; sy=e.clientY; pid=e.pointerId; });
+  card.addEventListener("pointermove",function(e){ if(!drag)return; const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(!sw){ if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)){ sw=true; try{card.setPointerCapture(pid);}catch(_){} } else return; }
+    e.preventDefault(); card.classList.remove("snap"); card.style.transform="translateX("+dx+"px) rotate("+(dx/22)+"deg)";
+    if(R())R().style.opacity=dx>0?Math.min(1,dx/TH):0; if(L())L().style.opacity=dx<0?Math.min(1,-dx/TH):0; });
+  function up(e){ if(!drag)return; const dx=(e.clientX||sx)-sx; const was=sw; drag=false; sw=false;
+    if(was&&Math.abs(dx)>TH){ if(dx>0){ fly(true); } else { if(!revealed){ center(true); doReveal(); } else { fly(false); } } }
+    else if(was){ center(true); } else { if(!revealed) doReveal(); } }
+  card.addEventListener("pointerup",up);
+  card.addEventListener("pointercancel",function(){ drag=false; sw=false; center(true); });
+})();
 /* ============================ Cloud-Sync (Firebase Realtime DB, REST) ============================ */
 const SYNC_PREFIX=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_");
 let syncUrl=localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
@@ -1043,11 +1196,12 @@ function mergeSrs(a,b){ const out=Object.assign({},a||{}); for(const k in (b||{}
   const rx=rankSrs(x), ry=rankSrs(y);
   if(ry>rx || (ry===rx && (y.interval||0)>(x.interval||0)) || (ry===rx && (y.interval||0)===(x.interval||0) && (y.due||0)>(x.due||0))) out[k]=y;
  } return out; }
-function mergeStats(a,b){ a=a||{}; b=b||{}; const out=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,days:{}}, a);
+function mergeStats(a,b){ a=a||{}; b=b||{}; const out=Object.assign({streak:0,lastActiveDay:"",totalSeconds:0,totalAnswered:0,newLearnedTotal:0,knownTotal:0,days:{}}, a);
   out.streak=Math.max(a.streak||0,b.streak||0);
   out.totalSeconds=Math.max(a.totalSeconds||0,b.totalSeconds||0);
   out.totalAnswered=Math.max(a.totalAnswered||0,b.totalAnswered||0);
   out.newLearnedTotal=Math.max(a.newLearnedTotal||0,b.newLearnedTotal||0);
+  out.knownTotal=Math.max(a.knownTotal||0,b.knownTotal||0);
   out.lastActiveDay=((a.lastActiveDay||"")>(b.lastActiveDay||""))?a.lastActiveDay:b.lastActiveDay;
   out.days=Object.assign({}, a.days||{}); const bd=b.days||{};
   for(const d in bd){ const x=out.days[d], y=bd[d]; if(!x){ out.days[d]=y; continue; }
