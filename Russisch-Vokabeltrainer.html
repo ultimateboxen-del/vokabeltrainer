@@ -1033,7 +1033,7 @@ const SYNC_PREFIX=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_"
 let syncUrl=localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
 let syncCode=localStorage.getItem(SYNC_PREFIX+"sync_code")||"";
 let syncTimer=null, syncBusy=false;
-function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; return syncUrl.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode)+"/"+SYNC_PREFIX.replace(/_$/,"")+".json"; }
+function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; let b=syncUrl.trim(); if(!/^https?:\/\//i.test(b)) b="https://"+b; return b.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode.trim())+"/"+SYNC_PREFIX.replace(/_$/,"")+".json"; }
 function setSyncStatus(t){ const el=document.querySelector("#sync-status"); if(el) el.textContent=t; const d=document.querySelector("#sync-dot"); if(d) d.style.color=syncEndpoint()?"var(--good)":"var(--muted)"; }
 function localState(){ return {srs:srs, stats:stats, extra:extra, updatedAt:Date.now()}; }
 function rankSrs(s){ if(!s)return -1; if(s.phase==="review")return 3; if(s.started)return 2; return 1; }
@@ -1070,10 +1070,10 @@ async function syncPull(apply){
 async function syncPush(){
   const url=syncEndpoint(); if(!url) return;
   try{ syncBusy=true; setSyncStatus("Synchronisiere…");
-    const r=await fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(localState())});
-    if(!r.ok) throw 0;
-    setSyncStatus("Sync aktiv ✓");
-  }catch(e){ setSyncStatus("⚠️ Sync-Fehler – URL/Code prüfen"); }
+    const r=await fetch(url,{method:"PUT",body:JSON.stringify(localState())});
+    if(!r.ok){ setSyncStatus("⚠️ Server "+r.status+" – Firebase-Regeln prüfen"); return; }
+    setSyncStatus("Sync aktiv ✓ "+new Date().toLocaleTimeString());
+  }catch(e){ setSyncStatus("⚠️ Keine Verbindung – App über den github.io-Link öffnen (nicht als Datei)"); }
   finally{ syncBusy=false; }
 }
 function scheduleSync(){ if(!syncEndpoint())return; clearTimeout(syncTimer); syncTimer=setTimeout(syncPush,1500); }
@@ -1087,8 +1087,15 @@ window.addEventListener("focus", ()=>{ if(syncEndpoint()&&!syncBusy){ syncPull(t
   const b=document.querySelector("#btn-sync-connect"); if(b) b.onclick=async()=>{
     syncUrl=((u&&u.value)||"").trim(); syncCode=((c&&c.value)||"").trim();
     localStorage.setItem(SYNC_PREFIX+"sync_url",syncUrl); localStorage.setItem(SYNC_PREFIX+"sync_code",syncCode);
-    if(!syncEndpoint()){ setSyncStatus("Bitte URL und Code eingeben"); return; }
-    setSyncStatus("Verbinde…"); await syncPull(true); renderStats(); buildSession(); showCard(); await syncPush();
+    const ep=syncEndpoint();
+    if(!ep){ setSyncStatus("Bitte URL und Code eingeben"); return; }
+    setSyncStatus("Teste Verbindung…");
+    try{
+      const g=await fetch(ep,{cache:"no-store"}); if(!g.ok){ setSyncStatus("⚠️ Lesen "+g.status+" – Firebase-Regeln prüfen"); return; }
+      await syncPull(true); renderStats(); buildSession(); showCard();
+      const p=await fetch(ep,{method:"PUT",body:JSON.stringify(localState())}); if(!p.ok){ setSyncStatus("⚠️ Schreiben "+p.status); return; }
+      setSyncStatus("Sync aktiv ✓");
+    }catch(e){ setSyncStatus("⚠️ Keine Verbindung: "+((e&&e.message)||e)+" — App über den github.io-Link öffnen"); }
   };
   setSyncStatus(syncEndpoint()?"Bereit":"Nicht verbunden");
 })();
