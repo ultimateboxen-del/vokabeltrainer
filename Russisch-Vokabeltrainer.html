@@ -891,8 +891,9 @@ function record(correct,elapsed,becameNew){
 
 /* ============================ Sprachausgabe ============================ */
 let ruVoice=null;
+const VPREF=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_");
 const VOICE_LANG="ru", VOICE_REGION="RU";
-let chosenVoiceName=localStorage.getItem(SYNC_PREFIX+"voice")||"";
+let chosenVoiceName=localStorage.getItem(VPREF+"voice")||"";
 function pickVoice(){ if(!("speechSynthesis"in window))return; const vs=speechSynthesis.getVoices();
   if(chosenVoiceName){ const v=vs.find(x=>x.name===chosenVoiceName); if(v){ ruVoice=v; return; } }
   ruVoice = vs.find(v=>new RegExp("^"+VOICE_LANG+"[-_]?"+VOICE_REGION,"i").test(v.lang)) || vs.find(v=>new RegExp("^"+VOICE_LANG,"i").test(v.lang)) || null; }
@@ -903,7 +904,7 @@ const speakCurrent=()=>{ if(current)speak(current.ru); };
 function fillVoiceSelect(){ const sel=$("#voice-select"); if(!sel)return; const vs=listVoices();
   if(!vs.length){ sel.innerHTML='<option value="">(keine passende Stimme installiert)</option>'; return; }
   sel.innerHTML='<option value="">Automatisch (beste)</option>'+vs.map(function(v){return '<option value="'+v.name.replace(/"/g,"")+'"'+(v.name===chosenVoiceName?" selected":"")+'>'+v.name+" ("+v.lang+")</option>";}).join("");
-  sel.onchange=function(){ chosenVoiceName=sel.value; localStorage.setItem(SYNC_PREFIX+"voice",chosenVoiceName); pickVoice(); speak(VOICE_LANG==="ru"?"Привет, как дела?":"Hola, ¿qué tal?"); voiceStatus(); }; }
+  sel.onchange=function(){ chosenVoiceName=sel.value; localStorage.setItem(VPREF+"voice",chosenVoiceName); pickVoice(); speak(VOICE_LANG==="ru"?"Привет, как дела?":"Hola, ¿qué tal?"); voiceStatus(); }; }
 function voiceStatus(){
   const el=$("#voice-status"); if(!el)return;
   if(!('speechSynthesis'in window)){ el.textContent="⚠️ Dein Browser kann nicht vorlesen"; return; }
@@ -925,7 +926,7 @@ function renderStats(){ const c=counts(); $("#s-new").textContent=c.n; $("#s-lea
   $("#flame").textContent="🔥 "+(stats.streak||0);
   const rec=dayRec(todayStr()), goal=cfg.dailyGoal;
   $("#goal-txt").textContent=rec.answered+" / "+goal+"  \u00b7  \ud83c\udd95 "+rec.newLearned+" neu heute"+((stats.knownTotal)?("  · 💡 "+stats.knownTotal+" gekonnt"):"");
-  $("#goal-bar").style.width=Math.min(100,Math.round(done/goal*100))+"%"; }
+  $("#goal-bar").style.width=Math.min(100,Math.round(rec.answered/goal*100))+"%"; }
 
 const promptSide=c=>cfg.dir==="de2ru"?c.de:c.ru;
 const answerSide=c=>cfg.dir==="de2ru"?c.ru:c.de;
