@@ -1184,8 +1184,8 @@ function toast(msg){ let t=document.querySelector("#vt-toast"); if(!t){ t=docume
 })();
 /* ============================ Cloud-Sync (Firebase Realtime DB, REST) ============================ */
 const SYNC_PREFIX=(typeof SRS_KEY==="string"?SRS_KEY.replace(/srs_v1$/,""):"vt_");
-let syncUrl=localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
-let syncCode=localStorage.getItem(SYNC_PREFIX+"sync_code")||"";
+let syncUrl=localStorage.getItem("vt_sync_url")||localStorage.getItem(SYNC_PREFIX+"sync_url")||"";
+let syncCode=localStorage.getItem("vt_sync_code")||localStorage.getItem(SYNC_PREFIX+"sync_code")||"";
 let syncTimer=null, syncBusy=false;
 function syncEndpoint(){ if(!syncUrl||!syncCode) return ""; let b=syncUrl.trim(); if(!/^https?:\/\//i.test(b)) b="https://"+b; return b.replace(/\/+$/,"")+"/vokabel/"+encodeURIComponent(syncCode.trim())+"/"+SYNC_PREFIX.replace(/_$/,"")+".json"; }
 function setSyncStatus(t){ const el=document.querySelector("#sync-status"); if(el) el.textContent=t; const d=document.querySelector("#sync-dot"); if(d) d.style.color=syncEndpoint()?"var(--good)":"var(--muted)"; }
@@ -1241,7 +1241,7 @@ window.addEventListener("focus", ()=>{ if(syncEndpoint()&&!syncBusy){ syncPull(t
   if(u)u.value=syncUrl; if(c)c.value=syncCode;
   const b=document.querySelector("#btn-sync-connect"); if(b) b.onclick=async()=>{
     syncUrl=((u&&u.value)||"").trim(); syncCode=((c&&c.value)||"").trim();
-    localStorage.setItem(SYNC_PREFIX+"sync_url",syncUrl); localStorage.setItem(SYNC_PREFIX+"sync_code",syncCode);
+    localStorage.setItem("vt_sync_url",syncUrl); localStorage.setItem("vt_sync_code",syncCode);
     const ep=syncEndpoint();
     if(!ep){ setSyncStatus("Bitte URL und Code eingeben"); return; }
     setSyncStatus("Teste Verbindung…");
