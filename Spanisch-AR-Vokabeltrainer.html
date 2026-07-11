@@ -2240,7 +2240,7 @@ const saveCfg=()=>saveJSON(CFG_KEY,cfg);
 const saveStats=()=>{ saveJSON(STAT_KEY,stats); scheduleSync(); };
 
 /* ============================ Wiederhol-Logik (Langzeitgedächtnis) ============================ */
-const LEARN_STEPS=2, START_IV=1;
+const LEARN_STEPS=1, START_IV=1;
 function fmtIv(days){ if(days<1)return "bald"; if(days<30)return Math.round(days)+" Tag"+(Math.round(days)===1?"":"e"); if(days<365)return Math.round(days/30)+" Mon."; return (days/365).toFixed(1)+" J."; }
 function preview(s){
   if(s.phase==="review") return {again:"gleich wieder", good:fmtIv(Math.max(START_IV,s.interval*2))};
